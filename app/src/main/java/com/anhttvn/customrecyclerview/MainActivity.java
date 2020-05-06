@@ -1,6 +1,8 @@
 package com.anhttvn.customrecyclerview;
 
 import android.app.ProgressDialog;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,6 +13,7 @@ import android.util.Log;
 
 import com.anhttvn.customrecyclerview.adapter.ListAdapter;
 import com.anhttvn.customrecyclerview.model.ItemAdapter;
+import com.anhttvn.customrecyclerview.utility.NetworkReceiver;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -28,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     JsonListService apiInterface;
     ProgressDialog progressDialog;
     SwipeRefreshLayout mSwipeRefreshLayout;
+    NetworkReceiver receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +46,9 @@ public class MainActivity extends AppCompatActivity {
         Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
 
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        receiver = new NetworkReceiver();
+        this.registerReceiver(receiver, filter);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent);
         progressDialog = ProgressDialog.show(MainActivity.this,
                 "ProgressDialog",
@@ -92,5 +99,13 @@ public class MainActivity extends AppCompatActivity {
         mRecycleview.setLayoutManager(new LinearLayoutManager(this));
         mAdapter.notifyDataSetChanged();
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(receiver != null) {
+            this.unregisterReceiver(receiver);
+        }
     }
 }
